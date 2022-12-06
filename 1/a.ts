@@ -12,4 +12,3 @@ caloriesList.forEach((calories) => {
 })
 
 console.log(fattestElf);
-
