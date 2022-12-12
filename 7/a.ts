@@ -11,12 +11,8 @@ interface File {
 
 const isCommand = (line: string): boolean => line.startsWith('$');
 
-
 const input = await Deno.readTextFile('input.txt');
-
 const lines = input.split('\r\n');
-
-
 
 const fileSystem: Directory = {
     name: '/',
@@ -78,7 +74,6 @@ const printDirectory = (directory: Directory, level = 0): void => {
 
 printDirectory(fileSystem);
 
-
 const calculateSizeOfDirectory = (directory: Directory, directorySizes: number[]): number => {
     let size = 0;
     let currentSize = 0;
@@ -91,10 +86,9 @@ const calculateSizeOfDirectory = (directory: Directory, directorySizes: number[]
         }
     } 
 
-
-        size += currentSize;
-        console.log(`${directory.name} (dir) ${size}`);
-        directorySizes.push(size);
+    size += currentSize;
+    console.log(`${directory.name} (dir) ${size}`);
+    directorySizes.push(size);
     
     return size;
 };
