@@ -23,7 +23,7 @@ const visitedPositions: string[][] = [['s']];
 const initialPosition =  { x: 0, y: 0 };
 const start: Position = { ...initialPosition, symbol: 's' };
 const head: Position = { ...initialPosition, symbol: 'H' };
-const tail: Position[] = [
+const rope: Position[] = [
     head,
     {...initialPosition, symbol: '1'},
     {...initialPosition, symbol: '2'},
@@ -44,8 +44,8 @@ const prependRow = () => {
     visitedPositions.unshift([...row]);
     start.y++;
     head.y++;
-    for (let i = 1; i < tail.length; i++) {
-        tail[i].y++;
+    for (let i = 1; i < rope.length; i++) {
+        rope[i].y++;
     }
 };
 
@@ -62,8 +62,8 @@ const prependColumn = () => {
     }
     start.x++;
     head.x++;
-    for (let i = 1; i < tail.length; i++) {
-        tail[i].x++;
+    for (let i = 1; i < rope.length; i++) {
+        rope[i].x++;
     }
 };
 
@@ -76,14 +76,10 @@ const appendColumn = () => {
 
 const moveKnots = (grid: string[][], head: Position): void => {
     grid[head.y][head.x] = '.';
-    if (arePositionsEqual(head, start)) {
-        grid[head.y][head.x] = 's';
-    }
 
-    for (let i = 1; i < tail.length; i++) {
-        if (arePositionsEqual(head, tail[i])) {
-            console.log(`tailsymbol: ${tail[i].symbol}`);
-            grid[head.y][head.x] = `${tail[i].symbol}`;
+    for (let i = 1; i < rope.length; i++) {
+        if (arePositionsEqual(head, rope[i])) {
+            grid[head.y][head.x] = `${rope[i].symbol}`;
             return;
         }
     }
@@ -99,9 +95,7 @@ for (const { direction, steps } of motions) {
             grid[head.y][head.x + 1] = 'H';
             moveKnots(grid, head);
             head.x++;
-        }
-
-        if (direction === 'L') {
+        } else if (direction === 'L') {
             if (head.x - 1 < 0) {
                 prependColumn();
             }
@@ -109,9 +103,7 @@ for (const { direction, steps } of motions) {
             grid[head.y][head.x - 1] = 'H';
             moveKnots(grid, head);
             head.x--;
-        }
-        
-        if (direction === 'U') {
+        } else if (direction === 'U') {
             if (head.y - 1 < 0) {
                 prependRow();
             }
@@ -119,9 +111,7 @@ for (const { direction, steps } of motions) {
             grid[head.y -1][head.x] = 'H';
             moveKnots(grid, head);
             head.y--;
-        }
-
-        if (direction === 'D') {
+        } else if (direction === 'D') {
             if (grid.length <= head.y + 1) {
                 appendRow();
             }
@@ -130,80 +120,49 @@ for (const { direction, steps } of motions) {
             moveKnots(grid, head);
             head.y++;
         }
+        let shouldSetStart = true;
+        if (arePositionsEqual(head, start)) shouldSetStart = false;
+        
+        for (let j = 1; j < rope.length; j++) {
+            const _head = rope[j - 1];
+            const _tail = rope[j];
+            const diffx = _head.x - _tail.x;
+            const diffy = _head.y - _tail.y;
 
-        // move tail right
-        for (let j = 1; j < tail.length; j++) {
-            let diff = tail[j - 1].x - tail[j].x;
-            if (Math.abs(diff) > 1) {
-                if (arePositionsEqual(tail[j-1], tail[j])) {
-                    grid[tail[j].y][tail[j].x] = `${tail[j].symbol}`;
-                } else if (arePositionsEqual(tail[j], start)) {
-                    grid[tail[j].y][tail[j].x] = 's';
-                } else {
-                    grid[tail[j].y][tail[j].x] = '.';
-                }
-
-                if (diff > 0) {
-                    tail[j].x++;
-                } else if (diff < 0) {
-                    tail[j].x--;
-                }
-
-                if (head.y - tail[j].y >= 1) { 
-                    tail[j].y++;
-                } else if (head.y - tail[j].y <= -1) {
-                    tail[j].y--;
-                }
-
-                grid[tail[j].y][tail[j].x] = `${tail[j].symbol}`;
-                if (tail[j].symbol === '9') {
-                    visitedPositions[tail[j].y][tail[j].x] = '#';
-                }
+            if (!arePositionsEqual(_head, _tail)) {
+                grid[_tail.y][_tail.x] = `${_tail.symbol}`;
             }
 
-            // move tail up
-            diff = tail[j - 1].y - tail[j].y;
-            if (Math.abs(diff) > 1) {
-                if (arePositionsEqual(tail[j-1], tail[j])) {
-                    grid[tail[j].y][tail[j].x] = `${tail[j].symbol}`;
-                } else if (arePositionsEqual(tail[j], start)) {
-                    grid[tail[j].y][tail[j].x] = 's';
-                } else {
-                    grid[tail[j].y][tail[j].x] = '.';
-                }
-                if (diff > 0) {
-                    tail[j].y++;   
-                } else if (diff < 0) {
-                    tail[j].y--;
-                }
-                if (head.x - tail[j].x >= 1) {
-                    tail[j].x++;
-                } else if (head.x - tail[j].x <= -1) {
-                    tail[j].x--;
-                }
-
-                grid[tail[j].y][tail[j].x] = `${tail[j].symbol}`;
-                if (tail[j].symbol === '9') {
-                    visitedPositions[tail[j].y][tail[j].x] = '#';
+            if (Math.abs(diffx) > 1 || Math.abs(diffy) > 1) {
+                if (!arePositionsEqual(_head, _tail)) {
+                    grid[_tail.y][_tail.x] = '.';
                 }
             }
-
-            // if (grid[tail[j].y][tail[j].x] === '.' || grid[tail[j].y][tail[j].x] === 's' || grid[tail[j].y][tail[j].x] !== 'H' && parseInt(tail[j].symbol) < parseInt(grid[tail[j].y][tail[j].x])) {
-            //     grid[tail[j].y][tail[j].x] = `${tail[j].symbol}`;
-            //     if (tail[j].symbol === '9') {
-            //         visitedPositions[tail[j].y][tail[j].x] = '#';
-            //     }
-            // }
-            
-
+            if (Math.abs(diffx) > 1) {
+                _tail.x += (diffx > 0) ? 1 : -1;
+                if (diffy !== 0) {
+                    _tail.y += diffy > 0 ? 1 : -1;
+                }
+            } else if (Math.abs(diffy) > 1) {
+                _tail.y += (diffy > 0) ? 1 : -1;
+                if (diffx !== 0) {
+                    _tail.x += diffx > 0 ? 1 : -1;
+                }
+            } 
+            if (Math.abs(diffx) > 1 || Math.abs(diffy) > 1) {
+                grid[_tail.y][_tail.x] = `${_tail.symbol}`;
+                if (_tail.symbol === '9') {
+                    visitedPositions[_tail.y][_tail.x] = '#';
+                }
+            }
+            if (arePositionsEqual(_tail, start)) shouldSetStart = false;
         }
-        console.log(printGrid(grid));
+        if (shouldSetStart) grid[start.y][start.x] = 's';
     }
-    
 }
 
 console.log(printGrid(grid));
 console.log(printGrid(visitedPositions));
 
 const numberOfVisitedPositions = visitedPositions.reduce((accumulator, row) => accumulator + row.reduce((rowAccumulator, position) => rowAccumulator + ((position === '#' || position === 's') ? 1 : 0), 0), 0);
-console.log(numberOfVisitedPositions);
+console.log(numberOfVisitedPositions); //2651
