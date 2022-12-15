@@ -1,40 +1,39 @@
+const isSpriteInFrame = (cycle: number, spritePostion: number): boolean =>
+  X <= cycle && cycle < X + 3;
+
 const input = await Deno.readTextFile("input.txt");
 const instructions = input.split("\r\n");
 
 const instructionSet: Record<
   string,
-  { cycles: number; action?: (parameter: string) => void }
+  { requiredCycles: number; action?: (parameter: string) => void }
 > = {
   "addx": {
-    cycles: 2,
+    requiredCycles: 2,
     action: (parameter: string): void => {
       X += parseInt(parameter);
     },
   },
-  "noop": { cycles: 1 },
+  "noop": { requiredCycles: 1 },
 };
+
 let X = 1;
 let cycle = 0;
 const newLine = 40;
 let display = "";
 
 for (const instruction of instructions) {
-  const [identifier, parameter] = instruction.split(" ");
-  const { cycles, action } = instructionSet[identifier];
+  const [command, parameter] = instruction.split(" ");
+  const { requiredCycles, action } = instructionSet[command];
 
-  for (let i = 0; i < cycles; i++) {
+  for (let i = 0; i < requiredCycles; i++) {
     cycle++;
 
-    if (X <= cycle && cycle < X + 3) {
-      display += "#";
-    } else {
-      display += ".";
-    }
+    display += isSpriteInFrame(cycle, X) ? "#" : ".";
 
-    if (cycle % newLine === 0) {
-      display += "\n";
-      cycle = 0;
-    }
+    if (cycle % newLine !== 0) continue;
+    display += "\n";
+    cycle = 0;
   }
   action?.(parameter);
 }
