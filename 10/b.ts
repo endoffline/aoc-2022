@@ -1,5 +1,5 @@
 const isSpriteInFrame = (cycle: number, spritePostion: number): boolean =>
-  X <= cycle && cycle < X + 3;
+  spritePostion <= cycle && cycle < spritePostion + 3;
 
 const input = await Deno.readTextFile("input.txt");
 const instructions = input.split("\r\n");
