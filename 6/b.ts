@@ -4,14 +4,14 @@ const sequenceSize = 14;
 let startOfSequence = 0, i = sequenceSize;
 
 while (!startOfSequence && i <= stream.length) {
-    const window = new Set(stream.substring(i - sequenceSize, i).split(''));
+	const window = new Set(stream.substring(i - sequenceSize, i).split(''));
 
-    if (window.size === sequenceSize) {
-        startOfSequence = i;
-        break;
-    }
+	if (window.size === sequenceSize) {
+		startOfSequence = i;
+		break;
+	}
 
-    i++;
+	i++;
 }
 
 console.log(startOfSequence);
